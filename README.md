@@ -6,3 +6,9 @@
 Monitor application resource usage
 ## Use case
 Develpoment environment
+
+# Components
+-Collector
+-Aggragator
+-InfluxDB
+-Grafana
