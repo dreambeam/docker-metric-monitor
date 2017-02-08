@@ -8,7 +8,7 @@ Monitor application resource usage
 Develpoment environment
 
 # Components
--Collector
--Aggragator
--InfluxDB
--Grafana
+- Collector
+- Aggragator
+- InfluxDB
+- Grafana
