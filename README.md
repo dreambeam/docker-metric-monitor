@@ -1,2 +1,2 @@
 # docker-metric-monitor
-Metric monitoring case
+Docker-compose for the metric monitoring application
