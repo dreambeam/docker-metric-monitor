@@ -1,4 +1,4 @@
-# Server metric monitoring framework MMF
+# Server Metric Monitoring Framework (MMF)
 ## Docker-compose for the metric monitoring application
 
 
@@ -6,10 +6,17 @@
 Monitor application's metrics
 
 ## Use case
-Develpoment server environment
+Monitor the development server environment:
+- Metrics and 
+- Resource usage
 
-# MMF Components
+
+## MMF Components
 - Collector
-- Aggragator
+Collets the metrics
+- Aggregator
+Aggregates the metrics
 - InfluxDB
+Time series DB, ingest the metrics
 - Grafana
+UI visualization of the metrics
