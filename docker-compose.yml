@@ -1,45 +1,58 @@
 version: '2'
 
 services:
-  aggregator:
-    build: ./aggregator
-    image: aggregator:latest
-    container_name: aggregator_1
-    link:
-    ports:
-
-    restart_policy:
-      condition: on-failure
-      delay: 10s
-
-  influxdb:
-    build: ./influxdb
-    image: influxdb:latest
-    container_name: influxdb_1
-    environment:
-    links:
-      - aggregator_1
-    depends_on:
-      - aggregator_1
-    ports:
-
-
 
   grafana:
     build: ./grafana
-    image: grafana:latest
-    container_name: grafana_1
-    environment:
-      USER_NAME:
-      PASSWORD:
-      DB_NAME:
-      DB_USER:
-      DB_PASSWORD:
-
+    image: grafana:4.2
+    container_name: grafana_metric
     links:
-      - influxdb_1
-    depends_on:
-      - influxdb_1
+      - influxdb_metric
+    environment:
+      - INFLUXDB_HOST=localhost
+      - INFLUXDB_PORT=8086
+      - INFLUXDB_NAME=server_metric
+      - INFLUXDB_USER=root
+      - INFLUXDB_PASS=root
+      - GF_SECURITY_ADMIN_PASSWORD=secret
     ports:
+      - "3000:3000"
+    volumes_from:
+      - container: grafana-storage
+    restart: always
+  
+  grafana_storage:
+    image: busybox:latest
+    container_name: grafana-storage
+    volumes:
+      - /var/lib/grafana
 
+  influxdb:
+    image: tutum/influxdb:latest
+    container_name: influxdb_metric
+    environment:
+      - ADMIN_USER=root
+      - PRE_CREATE_DB=server_metric
+      - INFLUXDB_INIT_PWD=root
+    links:
+      - aggregator_metric
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+    volumes_from:
+      - container: influxdb-storage
+    restart: always
 
+  influxdb_storage:
+    image: influxdb:latest
+    container_name: influxdb-storage
+    volumes:
+      - /opt/data
+
+  aggregator:
+    build: ./aggregator
+    image: aggregator:latest
+    container_name: aggregator_metric
+    ports:
+      - "7000:7000"
+    restart: always
