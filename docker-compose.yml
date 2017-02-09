@@ -1,0 +1,45 @@
+version: '2'
+
+services:
+  aggregator:
+    build: ./aggregator
+    image: aggregator:latest
+    container_name: aggregator_1
+    link:
+    ports:
+
+    restart_policy:
+      condition: on-failure
+      delay: 10s
+
+  influxdb:
+    build: ./influxdb
+    image: influxdb:latest
+    container_name: influxdb_1
+    environment:
+    links:
+      - aggregator_1
+    depends_on:
+      - aggregator_1
+    ports:
+
+
+
+  grafana:
+    build: ./grafana
+    image: grafana:latest
+    container_name: grafana_1
+    environment:
+      USER_NAME:
+      PASSWORD:
+      DB_NAME:
+      DB_USER:
+      DB_PASSWORD:
+
+    links:
+      - influxdb_1
+    depends_on:
+      - influxdb_1
+    ports:
+
+
