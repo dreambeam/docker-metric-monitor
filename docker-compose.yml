@@ -3,8 +3,7 @@ version: '2'
 services:
 
   grafana:
-    build: ./grafana
-    image: grafana:4.2
+    image: grafana/grafana
     container_name: grafana_metric
     links:
       - influxdb_metric
