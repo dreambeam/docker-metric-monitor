@@ -1,12 +1,9 @@
-version: '2'
-
 services:
-
   grafana:
     image: grafana/grafana
     container_name: grafana_metric
     links:
-      - influxdb_metric
+      - influxdb:influxdb_metric
     environment:
       - INFLUXDB_HOST=localhost
       - INFLUXDB_PORT=8086
