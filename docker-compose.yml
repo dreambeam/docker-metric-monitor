@@ -5,23 +5,19 @@ services:
     links:
       - influxdb:influxdb_metric
     environment:
-      - INFLUXDB_HOST=localhost
-      - INFLUXDB_PORT=8086
-      - INFLUXDB_NAME=server_metric
-      - INFLUXDB_USER=root
-      - INFLUXDB_PASS=root
+      - GF_SECURITY_ADMIN_USER= admin
       - GF_SECURITY_ADMIN_PASSWORD=secret
     ports:
       - "3000:3000"
     volumes_from:
-      - container: grafana-storage
+      - grafana_storage
     restart: always
   
   grafana_storage:
     image: busybox:latest
-    container_name: grafana-storage
     volumes:
       - /var/lib/grafana
+      - /var/log/grafana
 
   influxdb:
     image: tutum/influxdb:latest
@@ -36,12 +32,11 @@ services:
       - "8083:8083"
       - "8086:8086"
     volumes_from:
-      - container: influxdb-storage
+      - influxdb_storage
     restart: always
 
   influxdb_storage:
     image: influxdb:latest
-    container_name: influxdb-storage
     volumes:
       - /opt/data
 
