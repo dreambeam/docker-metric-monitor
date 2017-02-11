@@ -27,17 +27,15 @@ services:
   influxdb:
     image: tutum/influxdb:latest
     container_name: influxdb_metric
+    ports:
+      - "8083:8083"
+      - "8086:8086"
     environment:
       - ADMIN_USER=root
       - INFLUXDB_INIT_PWD=root
       - PRE_CREATE_DB=server_metric
       - INFLUXDB_USER=root
       - INFLUXDB_PASS=root
-    links:
-      - aggregator_metric
-    ports:
-      - "8083:8083"
-      - "8086:8086"
     volumes_from:
       - influxdb_storage
     restart: always
