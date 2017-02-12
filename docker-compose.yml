@@ -4,8 +4,11 @@ grafana:
   links:
     - influxdb:influx
   environment:
+    - GF_INSTALL_PLUGINS="abhisant-druid-datasource,alexanderzobnin-zabbix-app"
     - GF_SECURITY_ADMIN_USER=admin
     - GF_SECURITY_ADMIN_PASSWORD=secret
+    - GF_DASHBOARDS_JSON_ENABLED="true"
+    - GF_DASHBOARDS_JSON_PATH=/opt/grafana
     - INFLUXDB_PORT=8086
     - INFLUXDB_NAME=server_metric
     - INFLUXDB_USER=root
@@ -25,7 +28,7 @@ grafana_storage:
     - /var/log/grafana
 
 influxdb:
-  image: tutum/influxdb:latest
+  image: matisq/influxdb:latest
   container_name: influxdb
   hostname: influx
   ports:
@@ -56,7 +59,7 @@ aggregator:
   links:
     - influxdb:influx
   environment:
-    HOST_NAME: "telegraf"
+    HOST_NAME: "aggregator"
     INFLUXDB_HOST: "influx"
     INFLUXDB_PORT: "8086"
     DATABASE: "server_metric"
