@@ -1,62 +1,67 @@
-services:
-  grafana:
-    image: tutum/grafana
-    container_name: grafana_metric
-    links:
-      - influxdb:influxdb_metric
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=secret
-      - INFLUXDB_PORT=8086 
-      - INFLUXDB_NAME=server_metric
-      - INFLUXDB_USER=root
-      - INFLUXDB_PASS=root
-      - INFLUXDB_IS_GRAFANADB=true 
-    ports:
-      - "3000:3000"
-    volumes_from:
-      - grafana_storage
-    restart: always
-  
-  grafana_storage:
-    image: busybox:latest
-    volumes:
-      - /var/lib/grafana
-      - /var/log/grafana
+grafana:
+  image: tutum/grafana
+  container_name: grafana_metric
+  links:
+    - influxdb:influxdb_metric
+  environment:
+    - GF_SECURITY_ADMIN_USER=admin
+    - GF_SECURITY_ADMIN_PASSWORD=secret
+    - INFLUXDB_PORT=8086
+    - INFLUXDB_NAME=server_metric
+    - INFLUXDB_USER=root
+    - INFLUXDB_PASS=root
+    - INFLUXDB_IS_GRAFANADB=true
+  ports:
+    - "3000:3000"
+  volumes_from:
+    - grafana_storage
+  restart: always
 
-  influxdb:
-    image: tutum/influxdb:latest
-    container_name: influxdb_metric
-    ports:
-      - "8083:8083"
-      - "8086:8086"
-    environment:
-      - ADMIN_USER=root
-      - INFLUXDB_INIT_PWD=root
-      - PRE_CREATE_DB=server_metric
-      - INFLUXDB_USER=root
-      - INFLUXDB_PASS=root
-    volumes_from:
-      - influxdb_storage
-    restart: always
+grafana_storage:
+  image: busybox:latest
+  volumes:
+    - /var/lib/grafana
+    - /var/log/grafana
 
-  influxdb_storage:
-    image: influxdb:latest
-    volumes:
-      - /opt/data
+influxdb:
+  image: tutum/influxdb:latest
+  container_name: influxdb
+  hostname: influx
+  ports:
+    - "8083:8083"
+    - "8086:8086"
+  environment:
+    - ADMIN_USER=root
+    - INFLUXDB_INIT_PWD=root
+    - PRE_CREATE_DB=server_metric
+    - INFLUXDB_USER=root
+    - INFLUXDB_PASS=root
+  volumes_from:
+    - influxdb_storage
+  restart: always
 
-  aggregator:
-    image: telegraf:latest
-    container_name: aggregator_metric
-    links:
-        - influxdb:influxdb_metric
-    environment:
-        HOST_NAME: "telegraf"
-        INFLUXDB_HOST: "influxdb_metric"
-        INFLUXDB_PORT: "8086"
-        DATABASE: "server_metric"
-    tty: true
-    volumes:
-        -/proc:/mnt/proc:ro
-    privileged: true
-    restart: always
+influxdb_storage:
+  image: influxdb:latest
+  volumes:
+    - /opt/data
+
+aggregator:
+  build: aggregator
+  image: aggregator:latest
+  container_name: aggregator_metric
+  ports:
+    - "8125:8125/udp"
+    - "8092:8092/udp"
+    - "8094:8094"
+  links:
+    - influxdb:influx
+  environment:
+    HOST_NAME: "telegraf"
+    INFLUXDB_HOST: "influx"
+    INFLUXDB_PORT: "8086"
+    DATABASE: "server_metric"
+  tty: true
+  volumes:
+    -/proc:/mnt/proc:ro
+  privileged: true
+  restart: always
