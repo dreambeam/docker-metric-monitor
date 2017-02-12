@@ -1,23 +1,27 @@
-FROM debian:jessie
+FROM grafana/grafana:latest
 
-ARG DOWNLOAD_URL=https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_${_grafana_version}_amd64.deb
+MAINTAINER Bleza  <bleza.takouda@gmail.com>
 
-RUN apt-get update && \
-    apt-get -y --no-install-recommends install libfontconfig curl ca-certificates && \
-    apt-get clean && \
-    curl ${DOWNLOAD_URL} > /tmp/grafana.deb && \
-    dpkg -i /tmp/grafana.deb && \
-    rm /tmp/grafana.deb && \
-    curl -L https://github.com/tianon/gosu/releases/download/1.7/gosu-amd64 > /usr/sbin/gosu && \
-    chmod +x /usr/sbin/gosu && \
-    apt-get remove -y curl && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/*
+LABEL version="1.0"
 
-VOLUME ["/var/lib/grafana", "/var/log/grafana", "/etc/grafana"]
+LABEL description="Grafana Image with added system variables"
+
+RUN apt-get -q update &&\
+    DEBIAN_FRONTEND="noninteractive" apt-get -q upgrade -y -o Dpkg::Options::="--force-confnew" --no-install-recommends &&\
+    DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew" --no-install-recommends curl &&\
+    apt-get -q autoremove &&\
+    apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
+
+
+ADD run.sh /run.sh
+
+RUN mkdir /opt/grafana
+
+ADD ["*.json", "/opt/grafana/"]
 
 EXPOSE 3000
 
-COPY ./run.sh /run.sh
+VOLUME ["/var/lib/grafana", "/var/log/grafana", "/etc/grafana"]
+
 
 ENTRYPOINT ["/run.sh"]
