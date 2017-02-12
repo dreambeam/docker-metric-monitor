@@ -21,7 +21,7 @@ ADD ["*.json", "/opt/grafana/"]
 
 EXPOSE 3000
 
-VOLUME ["/var/lib/grafana", "/var/log/grafana", "/etc/grafana"]
+#VOLUME ["/var/lib/grafana", "/var/log/grafana", "/etc/grafana"]
 
 
 ENTRYPOINT ["/run.sh"]
