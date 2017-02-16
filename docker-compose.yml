@@ -4,16 +4,15 @@ grafana:
   links:
     - influxdb:influx
   environment:
-    - GF_INSTALL_PLUGINS="abhisant-druid-datasource,alexanderzobnin-zabbix-app"
-    - GF_SECURITY_ADMIN_USER=admin
-    - GF_SECURITY_ADMIN_PASSWORD=secret
-    - GF_DASHBOARDS_JSON_ENABLED="true"
-    - GF_DASHBOARDS_JSON_PATH=/opt/grafana
-    - INFLUXDB_PORT=8086
-    - INFLUXDB_NAME=server_metric
-    - INFLUXDB_USER=root
-    - INFLUXDB_PASS=root
-    - INFLUXDB_IS_GRAFANADB=true
+    GF_INSTALL_PLUGINS: "abhisant-druid-datasource,alexanderzobnin-zabbix-app,bosun-app,bosun-datasource,briangann-gauge-panel,crate-datasource,digiapulssi-breadcrumb-panel,fastweb-openfalcon-datasource,fetzerch-sunandmoon-datasource,foursquare-clouderamanager-datasource,grafana-clock-panel,grafana-example-app,grafana-influxdb-08-datasource,grafana-kairosdb-datasource,grafana-piechart-panel,grafana-simple-json-datasource,grafana-worldmap-panel,gridprotectionalliance-openhistorian-datasource,gridprotectionalliance-osisoftpi-datasource,hawkular-datasource,jdbranham-diagram-panel,kentik-app,mtanda-heatmap-epoch-panel,mtanda-histogram-panel,ns1-app,opennms-datasource,percona-percona-app,praj-ams-datasource,rackerlabs-blueflood-datasource,raintank-snap-app,raintank-worldping-app,ryantxu-ajax-panel,savantly-heatmap-panel,sileht-gnocchi-datasource,sraoss-sunburst-panel,stagemonitor-elasticsearch-app,udoprog-heroic-datasource,voxter-app"
+    GF_SECURITY_ADMIN_USER: admin
+    GF_SECURITY_ADMIN_PASSWORD: secret
+    GF_SECURITY_SECRET_KEY: grafana
+    GF_USERS_ALLOW_SIGN_UP: "true"
+    GF_USERS_ALLOW_ORG_CREATE: "true"
+    GF_AUTH_ANONYMOUS_ENABLED: "true"
+    GF_AUTH_ANONYMOUS_ORG_NAME: grafana
+    GF_DASHBOARDS_JSON_ENABLED: "true"
   ports:
     - "3000:3000"
   volumes_from:
@@ -26,20 +25,19 @@ grafana_storage:
   volumes:
     - /var/lib/grafana
     - /var/log/grafana
+    - /var/lib/grafana/plugins
 
 influxdb:
   image: matisq/influxdb:latest
   container_name: influxdb
-  hostname: influx
+  hostname: influxdb
   ports:
     - "8083:8083"
     - "8086:8086"
   environment:
-    - ADMIN_USER=root
-    - INFLUXDB_INIT_PWD=root
-    - PRE_CREATE_DB=server_metric
-    - INFLUXDB_USER=root
-    - INFLUXDB_PASS=root
+    INFLUX_DATABASE: "server_metric"
+    INFLUXDB_ADMIN_USER: "root"
+    INFLUX_ADMIN_PASS: "root"
   volumes_from:
     - influxdb_storage
   restart: always
@@ -52,19 +50,22 @@ influxdb_storage:
 aggregator:
   build: aggregator
   container_name: aggregator_metric
-  ports:
-    - "8125:8125/udp"
-    - "8092:8092/udp"
-    - "8094:8094"
   links:
-    - influxdb:influx
+    - influxdb:influxdb
   environment:
+    #HOST_PROC: /root/proc
+    #HOST_SYS: /sys
+    #HOST_ETC: /etc
     HOST_NAME: "aggregator"
-    INFLUXDB_HOST: "influx"
+    INFLUXDB_HOST: "influxdb"
     INFLUXDB_PORT: "8086"
     DATABASE: "server_metric"
   tty: true
   volumes:
-    - /proc:/mnt/proc:ro
+    - /etc:/localtime:/etc/localtime:ro
+    - /etc:/etc:ro
+    - /sys:/sys:ro
+    - /proc:/proc:ro
+    - var/run/docker.sock:/var/run/docker.sock:ro
   privileged: true
   restart: always
